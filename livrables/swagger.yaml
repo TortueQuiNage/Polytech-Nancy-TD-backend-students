@@ -38,6 +38,29 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Task'
 
+        get:
+            tags: [ tasks ]
+            summary: Récupérer l'ensemble des tâches
+            operationId: getAllTasks
+            parameters:
+                -   in: query
+                    name: todo-only
+                    required: false
+                    description: Indique s'il faut seulement récupérer les tâches à réaliser
+                    schema:
+                        type: boolean
+            responses:
+                '200':
+                    description: Liste des tâches récupérée avec succès
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/Task'
+                '204':
+                    description: Pas de résultat (aucune tâche ne correspond)
+
     /tasks/{id}:
         parameters:
             -   in: path
@@ -59,6 +82,33 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Task'
+                '404':
+                    description: Tâche non trouvée
+
+        delete:
+            tags: [ tasks ]
+            summary: Supprimer une tâche par ID
+            description: Supprime une tâche définitivement de la liste
+            operationId: deleteTask
+            responses:
+                '204':
+                    description: Tâche supprimée avec succès
+                '404':
+                    description: Tâche non trouvée
+
+        put:
+            tags: [ tasks ]
+            summary: Modifier une tâche à partir d’un JSON
+            operationId: updateTask
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Task'
+            responses:
+                '204':
+                    description: Tâche modifiée avec succès
                 '404':
                     description: Tâche non trouvée
 components:
