@@ -2,15 +2,14 @@ openapi: 3.0.3
 info:
     title: TODO API
     version: 1.0.0
-    description: >
-        API de gestion d'une TODO List.
+    description: API de gestion de tâches.
 servers:
     -   url: http://localhost:8080
-        description: Serveur local de développement
+        description: Serveur local
 
 tags:
     -   name: tasks
-        description: Opérations sur les tâches
+        description: Gestion des tâches
 
 paths:
     /tasks:
@@ -23,115 +22,163 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/Task'
+                            $ref: '#/components/schemas/TaskCreateDto'
             responses:
                 '201':
-                    description: Tâche créée avec succès
+                    description: Succès
                     headers:
                         Location:
-                            description: URL de la ressource créée
                             schema:
                                 type: string
                                 example: /tasks/1
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/Task'
+                                $ref: '#/components/schemas/TaskResponseDto'
+                '400':
+                    description: Invalide
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationErrorDto'
 
         get:
             tags: [ tasks ]
-            summary: Récupérer l'ensemble des tâches
+            summary: Liste des tâches
             operationId: getAllTasks
             parameters:
                 -   in: query
                     name: todo-only
                     required: false
-                    description: Indique s'il faut seulement récupérer les tâches à réaliser
                     schema:
                         type: boolean
             responses:
                 '200':
-                    description: Liste des tâches récupérée avec succès
+                    description: Succès
                     content:
                         application/json:
                             schema:
                                 type: array
                                 items:
-                                    $ref: '#/components/schemas/Task'
+                                    $ref: '#/components/schemas/TaskResponseDto'
                 '204':
-                    description: Pas de résultat (aucune tâche ne correspond)
+                    description: Aucun résultat
 
     /tasks/{id}:
         parameters:
             -   in: path
                 name: id
                 required: true
-                description: Identifiant numérique de la tâche
                 schema:
                     type: integer
                     minimum: 1
         get:
             tags: [ tasks ]
-            summary: Récupérer une tâche
-            description: Récupérer une tâche par son identifiant
+            summary: Voir une tâche
             operationId: getTaskById
             responses:
                 '200':
-                    description: Tâche trouvée avec succès
+                    description: Succès
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/Task'
+                                $ref: '#/components/schemas/TaskResponseDto'
                 '404':
-                    description: Tâche non trouvée
+                    description: Introuvable
 
         delete:
             tags: [ tasks ]
-            summary: Supprimer une tâche par ID
-            description: Supprime une tâche définitivement de la liste
+            summary: Supprimer une tâche
             operationId: deleteTask
             responses:
                 '204':
-                    description: Tâche supprimée avec succès
+                    description: Succès
                 '404':
-                    description: Tâche non trouvée
+                    description: Introuvable
 
         put:
             tags: [ tasks ]
-            summary: Modifier une tâche à partir d’un JSON
+            summary: Modifier une tâche
             operationId: updateTask
             requestBody:
                 required: true
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/Task'
+                            $ref: '#/components/schemas/TaskUpdateDto'
             responses:
                 '204':
-                    description: Tâche modifiée avec succès
+                    description: Succès
+                '400':
+                    description: Invalide
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidationErrorDto'
                 '404':
-                    description: Tâche non trouvée
+                    description: Introuvable
 components:
     schemas:
-        Task:
+        TaskCreateDto:
             type: object
-            description: Représentation d'une tâche
+            required:
+                - title
+            properties:
+                title:
+                    type: string
+                    maxLength: 50
+                    example: Rendre le projet
+                description:
+                    type: string
+                    maxLength: 255
+                    example: Push le code sur le GitLab.
+
+        TaskUpdateDto:
+            type: object
+            required:
+                - title
+                - done
+            properties:
+                title:
+                    type: string
+                    maxLength: 50
+                    example: Réviser le DS
+                description:
+                    type: string
+                    maxLength: 255
+                    example: Relire le cours de maths.
+                done:
+                    type: boolean
+                    example: true
+
+        TaskResponseDto:
+            type: object
+            required:
+                - id
+                - title
+                - done
             properties:
                 id:
                     type: integer
                     example: 1
                 title:
                     type: string
-                    nullable: false
-                    example: Acheter du lait
+                    maxLength: 50
+                    example: Acheter les softs
                 description:
                     type: string
-                    nullable: true
-                    example: 2L demi-écrémé
+                    maxLength: 255
+                    example: Prendre des sodas pour la soirée.
                 done:
                     type: boolean
-                    nullable: false
                     example: false
-            required:
-                - id
-                - title
+
+        ValidationErrorDto:
+            type: object
+            properties:
+                field:
+                    type: string
+                    example: title
+                message:
+                    type: string
+                    example: Le titre ne doit pas dépasser 50 caractères.

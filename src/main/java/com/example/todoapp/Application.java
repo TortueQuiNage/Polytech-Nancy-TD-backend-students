@@ -1,6 +1,6 @@
 package com.example.todoapp;
 
-import com.example.todoapp.presentation.StudentController;
+import com.example.todoapp.presentation.TaskController;
 import com.sun.net.httpserver.HttpServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,8 +17,7 @@ public class Application {
     public static void main(String[] args) throws Exception {
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
 
-        // On redirige tout vers notre couche présentation
-        server.createContext("/tasks", StudentController::handleTasks);
+        server.createContext("/tasks", TaskController::handleTasks);
 
         server.setExecutor(null);
         server.start();

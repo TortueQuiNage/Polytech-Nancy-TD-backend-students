@@ -26,7 +26,7 @@ public class TaskDao {
              Statement stmt = conn.createStatement()) {
             stmt.execute(createTableSQL);
 
-            // Si la base est totalement vide, on insère le jeu de données initial du TD
+
             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM tasks;");
             if (rs.next() && rs.getInt(1) == 0) {
                 stmt.execute("INSERT INTO tasks (id, title, description, done) VALUES (1, 'Réviser DS de maths', 'Séries numériques et probabilités.', 0);");
@@ -39,10 +39,9 @@ public class TaskDao {
     }
 
     public Task save(Task task) {
-        // On ne mentionne PAS l'id dans le INSERT pour laisser SQLite l'auto-générer
+
         String sql = "INSERT INTO tasks (title, description, done) VALUES (?, ?, ?);";
 
-        // Le "Statement.RETURN_GENERATED_KEYS" permet de demander à SQLite quel ID il a choisi
         try (Connection conn = DriverManager.getConnection(DB_URL);
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -52,11 +51,11 @@ public class TaskDao {
 
             ps.executeUpdate();
 
-            // On récupère l'ID généré par SQLite
+
             try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     int generatedId = generatedKeys.getInt(1);
-                    // On renvoie une nouvelle Task avec le VRAI ID de la base de données
+
                     return new Task(generatedId, task.title(), task.description(), task.done());
                 }
             }
@@ -91,7 +90,7 @@ public class TaskDao {
 
     public Collection<Task> findAll(boolean todoOnly) {
         List<Task> tasks = new ArrayList<>();
-        // Si todoOnly est vrai, on ajoute un filtre WHERE done = 0
+
         String sql = todoOnly ?
                 "SELECT id, title, description, done FROM tasks WHERE done = 0;" :
                 "SELECT id, title, description, done FROM tasks;";
@@ -138,7 +137,7 @@ public class TaskDao {
             ps.setInt(4, id);
 
             int rowsUpdated = ps.executeUpdate();
-            return rowsUpdated > 0; // Renvoie true si la tâche existait et a été mise à jour
+            return rowsUpdated > 0;
         } catch (SQLException e) {
             throw new RuntimeException("Échec de la mise à jour de la tâche " + id, e);
         }
